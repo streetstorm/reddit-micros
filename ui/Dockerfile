@@ -1,0 +1,20 @@
+FROM ruby:2.2-alpine
+
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    make
+
+ENV APP_HOME /app
+
+RUN mkdir $APP_HOME
+
+WORKDIR $APP_HOME
+COPY . $APP_HOME
+# COPY Gemfile* $APP_HOME/
+RUN bundle install
+
+ENV POST_SERVICE_HOST="post" POST_SERVICE_PORT="5000" \
+    COMMENT_SERVICE_HOST="comment" COMMENT_SERVICE_PORT="9292"
+
+CMD ["puma"]
