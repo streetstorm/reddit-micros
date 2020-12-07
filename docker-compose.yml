@@ -57,6 +57,3 @@ networks:
     name: back_net
   front_net:
     name: front_net
-  prometheus:
-    external: true
-    name: prometheus
