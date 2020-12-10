@@ -50,7 +50,7 @@ build docker:
     - script:
         interpreter: SHELL
         scripts:
-          - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.docker_hub_pass}
+          - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.password_docker}
           - docker push ${bamboo.docker_hub_name}/comment:${bamboo.buildNumber}
           - docker push ${bamboo.docker_hub_name}/comment:latest
           - docker push ${bamboo.docker_hub_name}/post:${bamboo.buildNumber}
@@ -66,7 +66,7 @@ Run reddit:
     - script:
         interpreter: SHELL
         scripts:
-          - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.docker_hub_pass}
+          - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.password_docker}
           - sed s#latest#${bamboo.buildNumber}#g -i .env
           - docker-compose pull ui post comment
           - docker-compose down || true
