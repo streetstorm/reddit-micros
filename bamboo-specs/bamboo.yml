@@ -11,7 +11,7 @@ stages:
       jobs:
         - build docker
   - Deploy:
-      manual: false
+      manual: true
       final: false
       jobs:
         - Run reddit
@@ -74,7 +74,7 @@ Run reddit:
 triggers:
   - polling:
       period: "180"
-  - remote
+#  - remote
 branches:
   create: manually
   delete: never
