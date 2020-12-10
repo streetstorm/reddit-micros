@@ -68,7 +68,7 @@ Run reddit:
         scripts:
           - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.docker_hub_pass}
           - sed s#latest#${bamboo.buildNumber}#g -i .env
-          - docker-compose pull
+          - docker-compose pull ui post comment
           - docker-compose down || true
           - docker-compose --env-file=.env up -d --force-recreate
 triggers:
