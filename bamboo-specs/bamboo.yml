@@ -1,0 +1,103 @@
+---
+version: 2
+plan:
+  project-key: TEST
+  key: RED
+  name: reddit
+stages:
+  - Build:
+      manual: false
+      final: false
+      jobs:
+        - build docker
+  - Deploy:
+      manual: false
+      final: false
+      jobs:
+        - Run reddit
+build docker:
+  key: BRC
+  tasks:
+    - checkout:
+        force-clean-build: "false"
+    - any-task:
+        plugin-key: com.atlassian.bamboo.plugins.bamboo-docker-plugin:task.docker.cli
+        configuration:
+          commandOption: build
+          repository: ${bamboo.docker_hub_name}/comment:${bamboo.buildNumber}
+          dockerfileOption: existing
+          nocache: "false"
+          save: "false"
+          workingSubDirectory: comment
+    - any-task:
+        plugin-key: com.atlassian.bamboo.plugins.bamboo-docker-plugin:task.docker.cli
+        configuration:
+          commandOption: build
+          repository: ${bamboo.docker_hub_name}/post:${bamboo.buildNumber}
+          dockerfileOption: existing
+          nocache: "false"
+          save: "false"
+          workingSubDirectory: post-py
+    - any-task:
+        plugin-key: com.atlassian.bamboo.plugins.bamboo-docker-plugin:task.docker.cli
+        configuration:
+          commandOption: build
+          repository: ${bamboo.docker_hub_name}/ui:${bamboo.buildNumber}
+          dockerfileOption: existing
+          nocache: "false"
+          save: "false"
+          workingSubDirectory: ui
+    - script:
+        interpreter: SHELL
+        scripts:
+          - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.docker_hub_pass}
+          - docker push ${bamboo.docker_hub_name}/comment:${bamboo.buildNumber}
+          - docker push ${bamboo.docker_hub_name}/comment:latest
+          - docker push ${bamboo.docker_hub_name}/post:${bamboo.buildNumber}
+          - docker push ${bamboo.docker_hub_name}/post:latest
+          - docker push ${bamboo.docker_hub_name}/ui:${bamboo.buildNumber}
+          - docker push ${bamboo.docker_hub_name}/ui:latest
+
+Run reddit:
+  key: JOB1
+  tasks:
+    - checkout:
+        force-clean-build: "false"
+    - script:
+        interpreter: SHELL
+        scripts:
+          - docker login -u ${bamboo.docker_hub_name} -p ${bamboo.docker_hub_pass}
+          - sed s#latest#${bamboo.buildNumber}#g -i .env
+          - docker-compose pull
+          - docker-compose down || true
+          - docker-compose --env-file=.env up -d --force-recreate
+triggers:
+  - polling:
+      period: "180"
+  - remote
+branches:
+  create: manually
+  delete: never
+  link-to-jira: true
+notifications: []
+labels: []
+other:
+  concurrent-build-plugin: system-default
+---
+version: 2
+plan:
+  key: TEST-RED
+plan-permissions:
+  - users:
+      - bamboo
+    permissions:
+      - view
+      - edit
+      - build
+      - clone
+      - admin
+  - roles:
+      - logged-in
+      - anonymous
+    permissions:
+      - view
