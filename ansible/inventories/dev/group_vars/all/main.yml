@@ -1,0 +1,12 @@
+using_dockerhub_registry: true
+docker_hub_name: docker_user
+docker_hub_password: docker_password
+reddit_path_1: ./comment
+reddit_path_2: ./post-py
+reddit_path_3: ./ui
+reddit_repo_name_1: docker_user/comment
+reddit_repo_name_2: usdocker_userer/post
+reddit_repo_name_3: docker_user/ui
+reddit_repo_tag_1: latest
+reddit_repo_tag_2: latest
+reddit_repo_tag_3: latest
