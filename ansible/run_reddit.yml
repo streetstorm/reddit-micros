@@ -1,0 +1,16 @@
+- hosts: web
+  tasks:
+    - name: copy docker-compose
+      copy:
+        src: "{{ item }}"
+        dst: /home/"{{ ansible_user }}"/
+        with_items:
+          - ../.env
+          - ../docker-compose.yml
+
+    - name: Start docker-compose
+      docker_compose:
+        project_src: /home/"{{ ansible_user }}"/
+        build: no
+        pull: yes
+        state: present
