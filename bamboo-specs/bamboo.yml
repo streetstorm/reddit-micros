@@ -1,0 +1,73 @@
+---
+version: 2
+plan:
+  project-key: TEST
+  key: RED4
+  name: reddit_ansible
+stages:
+  - Build:
+      manual: false
+      final: false
+      jobs:
+        - Ansible build
+  - Deploy:
+      manual: true
+      final: false
+      jobs:
+        - Run docker-compose
+Ansible build:
+  key: AB
+  tasks:
+    - checkout:
+        force-clean-build: "false"
+    - script:
+        interpreter: SHELL
+        scripts:
+          - |-
+            ansible-galaxy install -f -r requirements.yml
+            sed s#latest#${bamboo.buildNumber}#g -i inventories/dev/group_vars/all/main.yml
+            sed s#docker_user#${bamboo.docker_hub_name}#g -i inventories/dev/group_vars/all/main.yml
+            sed s#docker_password#${bamboo.password_docker}#g -i inventories/dev/group_vars/all/main.yml
+            ansible-playbook -i inventories/dev/hosts playbook.yml
+        working-dir: ansible
+Run docker-compose:
+  key: RD
+  tasks:
+    - checkout:
+        force-clean-build: "false"
+    - script:
+        interpreter: SHELL
+        scripts:
+          - |-
+            sed s#latest#${bamboo.buildNumber}#g -i ../.env
+            ansible-playbook -i inventories/dev/hosts run_reddit.yml
+        working-dir: ansible
+triggers:
+  - polling:
+      period: "180"
+branches:
+  create: manually
+  delete: never
+  link-to-jira: true
+notifications: []
+labels: []
+other:
+  concurrent-build-plugin: system-default
+---
+version: 2
+plan:
+  key: TEST-RED4
+plan-permissions:
+  - users:
+      - bamboo
+    permissions:
+      - view
+      - edit
+      - build
+      - clone
+      - admin
+  - roles:
+      - logged-in
+      - anonymous
+    permissions:
+      - view
