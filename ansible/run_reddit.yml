@@ -4,9 +4,9 @@
       copy:
         src: "{{ item }}"
         dst: /home/"{{ ansible_user }}"/
-        with_items:
-          - ../.env
-          - ../docker-compose.yml
+      with_items:
+        - ../.env
+        - ../docker-compose.yml
 
     - name: Start docker-compose
       docker_compose:
