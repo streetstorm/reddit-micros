@@ -8,8 +8,8 @@
         group: "{{ ansible_user }}"
         mode: 0755
       with_items:
-        - .env
-        - docker-compose.yml
+        - ../.env
+        - ../docker-compose.yml
 
     - name: Start docker-compose
       docker_compose:
