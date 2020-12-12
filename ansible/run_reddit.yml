@@ -3,7 +3,7 @@
     - name: copy docker-compose
       copy:
         src: "{{ item }}"
-        dest: /home/"{{ ansible_user }}"
+        dest: /home/{{ ansible_user }}
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: 0755
@@ -13,7 +13,7 @@
 
     - name: Start docker-compose
       docker_compose:
-        project_src: /home/"{{ ansible_user }}"/
+        project_src: /home/{{ ansible_user }}/
         build: no
         pull: yes
         state: present

@@ -1,0 +1,59 @@
+version: "3.3"
+services:
+  post_db:
+    image: mongo:${MONGO_V}
+    volumes:
+      - "post_db:/data/db"
+    networks:
+      back_net:
+        aliases:
+          - post_db
+          - comment_db
+          - mongodb
+  ui:
+    image: ${DOCKERHUB_NAME}/ui:${UI_V}
+    environment:
+      - POST_SERVICE_HOST=post
+      - POST_SERVICE_PORT=5000
+      - COMMENT_SERVICE_HOST=comment
+      - COMMENT_SERVICE_PORT=9292
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    ports:
+      - ${PORT_UI}:9292/tcp
+    depends_on:
+      - post
+    networks:
+      - front_net
+
+  post:
+    image: ${DOCKERHUB_NAME}/post:${POST_V}
+    environment:
+      - POST_DATABASE_HOST=post_db
+      - POST_DATABASE=posts
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    depends_on:
+      - post_db
+    ports:
+      - "5000:5000"
+    networks:
+      - back_net
+      - front_net
+
+  comment:
+    image: ${DOCKERHUB_NAME}/comment:${COMMENT_V}
+    environment:
+      - COMMENT_DATABASE_HOST=comment_db
+      - COMMENT_DATABASE=comments
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    networks:
+      - back_net
+      - front_net
+
+volumes:
+  post_db:
+
+networks:
+  back_net:
+    name: back_net
+  front_net:
+    name: front_net
